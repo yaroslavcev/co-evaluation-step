@@ -6,10 +6,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import com.crossover.trial.weather.api.DataPoint;
+
 /**
- * A reference implementation for the weather client. Consumers of the REST API can look at WeatherClient
- * to understand API semantics. This existing client populates the REST endpoint with dummy data useful for
- * testing.
+ * A reference implementation for the weather client. Consumers of the REST API
+ * can look at WeatherClient to understand API semantics. This existing client
+ * populates the REST endpoint with dummy data useful for testing.
  *
  * @author code test administrator
  */
@@ -24,9 +26,13 @@ public class WeatherClient {
     private WebTarget collect;
 
     public WeatherClient() {
+        this(BASE_URI);
+    }
+
+    public WeatherClient(String baseUri) {
         Client client = ClientBuilder.newClient();
-        query = client.target(BASE_URI + "/query");
-        collect = client.target(BASE_URI + "/collect");
+        query = client.target(baseUri).path("query");
+        collect = client.target(baseUri).path("collect");
     }
 
     public void pingCollect() {
@@ -49,18 +55,9 @@ public class WeatherClient {
 
     public void populate(String pointType, int first, int last, int mean, int median, int count) {
         WebTarget path = collect.path("/weather/BOS/" + pointType);
-        DataPoint dp = new DataPoint.Builder()
-                .withFirst(first).withLast(last).withMean(mean).withMedian(median).withCount(count)
-                .build();
+        DataPoint dp = new DataPoint.Builder().withFirst(first).withLast(last).withMean(mean).withMedian(median)
+                .withCount(count).build();
         Response post = path.request().post(Entity.entity(dp, "application/json"));
-    }
-
-    public void exit() {
-        try {
-            collect.path("/exit").request().get();
-        } catch (Throwable t) {
-            // swallow
-        }
     }
 
     public static void main(String[] args) {
@@ -75,8 +72,7 @@ public class WeatherClient {
         wc.query("MMU");
 
         wc.pingQuery();
-        wc.exit();
+
         System.out.print("complete");
-        System.exit(0);
     }
 }

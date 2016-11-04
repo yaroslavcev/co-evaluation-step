@@ -1,7 +1,13 @@
 package com.crossover.trial.weather;
 
+import com.crossover.trial.weather.api.AirportData;
+import com.crossover.trial.weather.api.AtmosphericInformation;
+import com.crossover.trial.weather.api.WeatherQueryEndpoint;
+import com.crossover.trial.weather.service.AirportService;
+import com.crossover.trial.weather.service.WeatherQueryStatisticService;
 import com.google.gson.Gson;
 
+import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -24,7 +30,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     public static final double R = 6372.8;
 
     /** shared gson json to object factory */
-    public static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     /** all known airports */
     protected static List<AirportData> airportData = new ArrayList<>();
@@ -45,6 +51,14 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     static {
         init();
     }
+    
+
+    @Inject
+    private AirportService airportService;
+    
+    @Inject
+    private WeatherQueryStatisticService queryStatistic;
+    
     /**
      * Retrieve service health including total size of valid data points and request frequency information.
      *
@@ -52,43 +66,12 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
      */
     @Override
     public String ping() {
+    	WeatherQueryStatistic stastic = queryStatistic.getStatisitc();
+    	
         Map<String, Object> retval = new HashMap<>();
-
-        int datasize = 0;
-        for (AtmosphericInformation ai : atmosphericInformation) {
-            // we only count recent readings
-            if (ai.getCloudCover() != null
-                || ai.getHumidity() != null
-                || ai.getPressure() != null
-                || ai.getPrecipitation() != null
-                || ai.getTemperature() != null
-                || ai.getWind() != null) {
-                // updated in the last day
-                if (ai.getLastUpdateTime() > System.currentTimeMillis() - 86400000) {
-                    datasize++;
-                }
-            }
-        }
-        retval.put("datasize", datasize);
-
-        Map<String, Double> freq = new HashMap<>();
-        // fraction of queries
-        for (AirportData data : airportData) {
-            double frac = (double)requestFrequency.getOrDefault(data, 0) / requestFrequency.size();
-            freq.put(data.getIata(), frac);
-        }
-        retval.put("iata_freq", freq);
-
-        int m = radiusFreq.keySet().stream()
-                .max(Double::compare)
-                .orElse(1000.0).intValue() + 1;
-
-        int[] hist = new int[m];
-        for (Map.Entry<Double, Integer> e : radiusFreq.entrySet()) {
-            int i = e.getKey().intValue() % 10;
-            hist[i] += e.getValue();
-        }
-        retval.put("radius_freq", hist);
+        retval.put("datasize", stastic.getDatasize());
+        retval.put("iata_freq", stastic.getIataFrequency());
+        retval.put("radius_freq", stastic.getRadiusFrequency());
 
         return gson.toJson(retval);
     }
@@ -112,16 +95,16 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
             int idx = getAirportDataIdx(iata);
             retval.add(atmosphericInformation.get(idx));
         } else {
-            AirportData ad = findAirportData(iata);
-            for (int i=0;i< airportData.size(); i++){
-                if (calculateDistance(ad, airportData.get(i)) <= radius){
-                    AtmosphericInformation ai = atmosphericInformation.get(i);
-                    if (ai.getCloudCover() != null || ai.getHumidity() != null || ai.getPrecipitation() != null
-                       || ai.getPressure() != null || ai.getTemperature() != null || ai.getWind() != null){
-                        retval.add(ai);
-                    }
-                }
-            }
+//            AirportData ad = findAirportData(iata);
+//            for (int i=0;i< airportData.size(); i++){
+//                if (calculateDistance(ad, airportData.get(i)) <= radius){
+//                    AtmosphericInformation ai = atmosphericInformation.get(i);
+//                    if (ai.getCloudCover() != null || ai.getHumidity() != null || ai.getPrecipitation() != null
+//                       || ai.getPressure() != null || ai.getTemperature() != null || ai.getWind() != null){
+//                        retval.add(ai);
+//                    }
+//                }
+//            }
         }
         return Response.status(Response.Status.OK).entity(retval).build();
     }
@@ -162,21 +145,21 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
         return airportData.indexOf(ad);
     }
 
-    /**
-     * Haversine distance between two airports.
-     *
-     * @param ad1 airport 1
-     * @param ad2 airport 2
-     * @return the distance in KM
-     */
-    public double calculateDistance(AirportData ad1, AirportData ad2) {
-        double deltaLat = Math.toRadians(ad2.latitude - ad1.latitude);
-        double deltaLon = Math.toRadians(ad2.longitude - ad1.longitude);
-        double a =  Math.pow(Math.sin(deltaLat / 2), 2) + Math.pow(Math.sin(deltaLon / 2), 2)
-                * Math.cos(ad1.latitude) * Math.cos(ad2.latitude);
-        double c = 2 * Math.asin(Math.sqrt(a));
-        return R * c;
-    }
+//    /**
+//     * Haversine distance between two airports.
+//     *
+//     * @param ad1 airport 1
+//     * @param ad2 airport 2
+//     * @return the distance in KM
+//     */
+//    public double calculateDistance(AirportData ad1, AirportData ad2) {
+//        double deltaLat = Math.toRadians(ad2.latitude - ad1.latitude);
+//        double deltaLon = Math.toRadians(ad2.longitude - ad1.longitude);
+//        double a =  Math.pow(Math.sin(deltaLat / 2), 2) + Math.pow(Math.sin(deltaLon / 2), 2)
+//                * Math.cos(ad1.latitude) * Math.cos(ad2.latitude);
+//        double c = 2 * Math.asin(Math.sqrt(a));
+//        return R * c;
+//    }
 
     /**
      * A dummy init method that loads hard coded data
