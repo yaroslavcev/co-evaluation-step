@@ -1,4 +1,4 @@
-package com.crossover.trial.weather;
+package com.crossover.trial.weather.api;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -80,8 +80,4 @@ public interface WeatherCollectorEndpoint {
     @DELETE
     @Path("/airport/{iata}")
     Response deleteAirport(@PathParam("iata") String iata);
-
-    @GET
-    @Path("/exit")
-    Response exit();
 }

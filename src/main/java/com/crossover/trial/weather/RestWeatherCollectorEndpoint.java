@@ -1,7 +1,14 @@
 package com.crossover.trial.weather;
 
+import com.crossover.trial.weather.api.AirportData;
+import com.crossover.trial.weather.api.AtmosphericInformation;
+import com.crossover.trial.weather.api.DataPoint;
+import com.crossover.trial.weather.api.DataPointType;
+import com.crossover.trial.weather.api.WeatherCollectorEndpoint;
+import com.crossover.trial.weather.service.AirportService;
 import com.google.gson.Gson;
 
+import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
@@ -24,7 +31,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
 
     /** shared gson json to object factory */
     public final static Gson gson = new Gson();
-
+    
     @Override
     public Response ping() {
         return Response.status(Response.Status.OK).entity("ready").build();
@@ -74,11 +81,6 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         return Response.status(Response.Status.NOT_IMPLEMENTED).build();
     }
 
-    @Override
-    public Response exit() {
-        System.exit(0);
-        return Response.noContent().build();
-    }
     //
     // Internal support methods
     //
