@@ -3,15 +3,15 @@ package com.crossover.trial.weather;
 import java.util.Map;
 
 public class WeatherQueryStatistic {
-	private int datasize;
+	private long datasize;
 	private Map<String, Double> iataFrequency;
 	private int[] radiusFrequency;
 
-	public int getDatasize() {
+	public long getDatasize() {
 		return datasize;
 	}
 
-	public void setDatasize(int datasize) {
+	public void setDatasize(long datasize) {
 		this.datasize = datasize;
 	}
 

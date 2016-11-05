@@ -17,17 +17,22 @@ public class WeatherIntegrationTest {
 		weatherServer = new WeatherServer(BASE_URI);
 		weatherServer.start();
 		
-		weatherClient = new WeatherClient(BASE_URI);
+		weatherClient = new WeatherClient(BASE_URI);//"http://ipv4.fiddler:9090");//
 	}
 	
 	@Test
 	public void runTest() {
-		weatherClient.pingQuery();
-		weatherClient.pingQuery();
+	    weatherClient.pingQuery();
+	    weatherClient.pingCollect();
+	    weatherClient.addAirport("BOS", "10", "10");
+	    weatherClient.populate("WIND", 1, 10, 5, 5, 100);
+		//weatherClient.pingQuery();
+		//weatherClient.pingQuery();
 	}
 	
 	@After
 	public void stopWeatherServer() {
 		weatherServer.stop();
+	    //while (true){}
 	}
 }

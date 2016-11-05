@@ -15,11 +15,11 @@ import javax.ws.rs.core.Response;
 public interface WeatherQueryEndpoint {
 
     /**
-     * Retrieve health and status information for the the query api. Returns information about how the number
-     * of datapoints currently held in memory, the frequency of requests for each IATA code and the frequency of
+     * Retrieve health and status information for the the query api. Returns information about how many valid
+     * datapoints currently held in memory, the frequency of requests for each IATA code and the frequency of
      * requests for each radius.
      *
-     * @return a JSON formatted dict with health information.
+     * @return a JSON formatted object with health information.
      */
     @GET
     @Path("/ping")
