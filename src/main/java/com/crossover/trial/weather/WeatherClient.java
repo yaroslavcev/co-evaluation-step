@@ -4,6 +4,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.crossover.trial.weather.api.DataPoint;
@@ -17,7 +18,7 @@ import com.crossover.trial.weather.api.DataPoint;
  */
 public class WeatherClient {
 
-    private static final String BASE_URI = "http://localhost:9090";
+    public static final String BASE_URI = "http://localhost:9090";
 
     /** end point for read queries */
     private WebTarget query;
@@ -57,9 +58,20 @@ public class WeatherClient {
         WebTarget path = collect.path("/weather/BOS/" + pointType);
         DataPoint dp = new DataPoint.Builder().withFirst(first).withLast(last).withMean(mean).withMedian(median)
                 .withCount(count).build();
-        Response post = path.request().post(Entity.entity(dp, "application/json"));
+        Response post = path.request().post(Entity.entity(dp, MediaType.APPLICATION_JSON));//, "application/json"
+        
+        System.out.println("Populate res: " + post);
     }
-
+    
+    public Response addAirport(String iata, String latString, String longString) {
+        return collect.path("/airport/{iata}/{lat}/{long}")
+            .resolveTemplate("iata", iata)
+            .resolveTemplate("lat", latString)
+            .resolveTemplate("long", longString)
+            .request()
+            .post(Entity.text(""));
+    }
+    
     public static void main(String[] args) {
         WeatherClient wc = new WeatherClient();
         wc.pingCollect();

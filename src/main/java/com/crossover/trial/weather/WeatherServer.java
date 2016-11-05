@@ -9,6 +9,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.crossover.trial.weather.di.DaoBinder;
 import com.crossover.trial.weather.di.ServiceBinder;
+import com.crossover.trial.weather.impl.RestWeatherCollectorEndpoint;
+import com.crossover.trial.weather.impl.RestWeatherQueryEndpoint;
 
 import java.io.IOException;
 import java.net.URI;

@@ -1,15 +1,16 @@
 package com.crossover.trial.weather.api;
 
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 /**
  * A collected point, including some information about the range of collected values
  *
  * @author code test administrator
  */
 public class DataPoint {
-
+    DataPointType type;
+    
+    /** the last time this data was updated, in milliseconds since UTC epoch */
+    private long lastUpdateTime;
+    
     public double mean = 0.0;
 
     public int first = 0;
@@ -74,12 +75,16 @@ public class DataPoint {
         this.count = count;
     }
 
-    public String toString() {
-        return ReflectionToStringBuilder.toString(this, ToStringStyle.NO_CLASS_NAME_STYLE);
+    public DataPointType getType() {
+        return type;
     }
 
-    public boolean equals(Object that) {
-        return this.toString().equals(that.toString());
+    public void setType(DataPointType type) {
+        this.type = type;
+    }
+
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
     }
 
     static public class Builder {

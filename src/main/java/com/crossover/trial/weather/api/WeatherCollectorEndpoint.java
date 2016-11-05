@@ -32,6 +32,7 @@ public interface WeatherCollectorEndpoint {
      */
     @POST
     @Path("/weather/{iata}/{pointType}")
+    @Consumes(MediaType.APPLICATION_JSON)
     Response updateWeather(@PathParam("iata") String iataCode,
                            @PathParam("pointType") String pointType,
                            String datapointJson);

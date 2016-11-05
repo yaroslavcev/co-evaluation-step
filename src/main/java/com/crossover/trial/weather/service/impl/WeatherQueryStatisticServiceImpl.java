@@ -11,13 +11,14 @@ import javax.inject.Inject;
 
 import com.crossover.trial.weather.WeatherQueryStatistic;
 import com.crossover.trial.weather.api.AirportData;
-import com.crossover.trial.weather.api.AtmosphericInformation;
 import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;
 
 public class WeatherQueryStatisticServiceImpl implements WeatherQueryStatisticService {
     public static final int RADIUS_HISTOGRAM_STEP = 10;
+    
+    private static final long _24H = 86400000; 
     
     private AirportService airportService;
     private AtmosphericInformationService atmosphericInformationService;
@@ -52,17 +53,8 @@ public class WeatherQueryStatisticServiceImpl implements WeatherQueryStatisticSe
     public WeatherQueryStatistic getStatisitc() {
         WeatherQueryStatistic stat = new WeatherQueryStatistic();
        
-        int datasize = 0;
-        for (AtmosphericInformation ai : atmosphericInformationService.getAllAtmosphericInformation()) {
-            // we only count recent readings
-            if (ai.getCloudCover() != null || ai.getHumidity() != null || ai.getPressure() != null
-                    || ai.getPrecipitation() != null || ai.getTemperature() != null || ai.getWind() != null) {
-                // updated in the last day
-                if (ai.getLastUpdateTime() > System.currentTimeMillis() - 86400000) {
-                    datasize++;
-                }
-            }
-        }
+        long _last24h = System.currentTimeMillis() - _24H;
+        long datasize = atmosphericInformationService.countAtmosphericInformation(_last24h);
         
         stat.setDatasize(datasize);
         
