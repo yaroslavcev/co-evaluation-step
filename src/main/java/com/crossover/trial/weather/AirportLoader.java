@@ -1,23 +1,19 @@
 package com.crossover.trial.weather;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.WebTarget;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.crossover.trial.weather.api.AirportData;
-
-import java.io.*;
-import java.util.LinkedList;
-import java.util.List;
-
 /**
  * A simple airport loader which reads a file from disk and sends entries to the
  * webservice
- *
- * TODO: Implement the Airport Loader
  * 
  * @author code test administrator
  */
@@ -56,17 +52,17 @@ public class AirportLoader {
         String[] columns = line.split(splitBy);
         int length = columns.length;
         if (iataPos >= length) {
-            printErrorMessage(makeLineDoesNotContain(line, "IATA code"));
+            printErrorMessage(makeMessageLineDoesNotContain(line, "IATA code"));
             return;
         }
 
         if (latitudePos >= length) {
-            printErrorMessage(makeLineDoesNotContain(line, "latitude"));
+            printErrorMessage(makeMessageLineDoesNotContain(line, "latitude"));
             return;
         }
 
         if (longitudePos >= length) {
-            printErrorMessage(makeLineDoesNotContain(line, "longitude"));
+            printErrorMessage(makeMessageLineDoesNotContain(line, "longitude"));
             return;
         }
 
@@ -81,7 +77,6 @@ public class AirportLoader {
             printErrorMessage("Error while processing [" + line + "]. Error code " + result.errorCode
                     + ". Error message " + result.errorMessage);
         }
-
     }
 
     private AirportPostResult postAirport(String iata, String latitude, String longitude) {
@@ -95,7 +90,7 @@ public class AirportLoader {
         return new AirportPostResult(message != null ? message.toString() : "", response.getStatus());
     }
 
-    private String makeLineDoesNotContain(String line, String what) {
+    private String makeMessageLineDoesNotContain(String line, String what) {
         return "Line [" + line + "] does not contain " + what;
     }
 
@@ -121,8 +116,6 @@ public class AirportLoader {
             return;
         }
         long start = System.currentTimeMillis();
-//        AirportLoader al = new AirportLoader();
-//        al.generateAirports(10000, filePath + "_");
         AirportLoader al = new AirportLoader();
         try (FileInputStream fis = new FileInputStream(airportDataFile + "_")) {
             al.upload(fis);
@@ -153,49 +146,6 @@ public class AirportLoader {
             this.errorMessage = errorMessage;
             this.errorCode = errorCode;
             ok = false;
-        }
-    }
-
-    private void generateAirports(int count, String filePath) throws FileNotFoundException, IOException {
-        IataGenerator iataGenerator = new IataGenerator();
-        try (OutputStreamWriter fos = new OutputStreamWriter(new FileOutputStream(filePath))) {
-            while (count-- > 0) {
-                fos.write(String.format(TEMPLATE, iataGenerator.next()));
-            }
-        }
-    }
-
-    private String TEMPLATE = "1,\"General Edward Lawrence Logan Intl\",\"Boston\",\"United States\",\"%s\",\"KBOS\",42.364347,-71.005181,19,-5,\"A\"\r\n";
-
-    private static class IataGenerator {
-        private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        int i, j, k;
-
-        public String next() {
-            String res = "" + ALPHABET.charAt(i) + ALPHABET.charAt(j) + ALPHABET.charAt(k);
-            incrementK();
-            return res;
-        }
-
-        private void incrementK() {
-            if (++k == ALPHABET.length()) {
-                k = 0;
-                incrementJ();
-            }
-        }
-
-        private void incrementJ() {
-            if (++j == ALPHABET.length()) {
-                j = 0;
-                incrementI();
-            }
-        }
-
-        private void incrementI() {
-            if (++i == ALPHABET.length()) {
-                throw new RuntimeException("IataGenerator reached the end");
-            }
         }
     }
 }

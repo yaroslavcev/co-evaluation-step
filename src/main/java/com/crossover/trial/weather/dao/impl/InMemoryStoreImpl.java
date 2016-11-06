@@ -3,7 +3,7 @@ package com.crossover.trial.weather.dao.impl;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -32,7 +32,7 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
     /**
      * Data points per airport cache.
      */
-    private ConcurrentMap<String, Set<DataPoint>> dataPointsPerAirport = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, Map<DataPointType, DataPoint>> dataPointsPerAirport = new ConcurrentHashMap<>();
  
     /**
      * All airports map. iata code -> airport.
@@ -53,16 +53,17 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
     
     @Override
     public void updateWeather(String iataCode, DataPoint dataPoint) throws AirportNotFoundException {
-        onlyIfAirportExist(iataCode, () -> {
-            DataPointKey dpKey = new DataPointKey(iataCode, dataPoint.getType());
-            allDataPoints.put(dpKey, dataPoint);
+        ifAirportExistExecuteUnderLock(iataCode, () -> {
+            DataPointType dataPointType = dataPoint.getType();
+            getDataPointsForAirport(iataCode).put(dataPointType, dataPoint);
             
-            getDataPointsForAirport(iataCode).add(dataPoint);
+            DataPointKey dpKey = new DataPointKey(iataCode, dataPointType);
+            allDataPoints.put(dpKey, dataPoint);
         });
     }
     
-    private Set<DataPoint> getDataPointsForAirport(String iataCode) {
-        return dataPointsPerAirport.computeIfAbsent(iataCode, (o) -> ConcurrentHashMap.newKeySet());
+    private Map<DataPointType, DataPoint> getDataPointsForAirport(String iataCode) {
+        return dataPointsPerAirport.computeIfAbsent(iataCode, (o) -> new ConcurrentHashMap<>());
     }
     
     /**
@@ -70,7 +71,7 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
      * @param iataCode airport to lock
      * @param action action to execute
      */
-    private void onlyIfAirportExist(String iataCode, Runnable action) throws AirportNotFoundException {
+    private void ifAirportExistExecuteUnderLock(String iataCode, Runnable action) throws AirportNotFoundException {
         ReadWriteLock lock = getLock(iataCode);
         if (lock == null) {
             throw new AirportNotFoundException(iataCode);
@@ -105,7 +106,7 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
 
     @Override
     public Collection<DataPoint> getAllForAirport(String iataCode) {
-        return Collections.unmodifiableCollection(getDataPointsForAirport(iataCode));
+        return Collections.unmodifiableCollection(getDataPointsForAirport(iataCode).values());
     }
 
     @Override
@@ -165,15 +166,18 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
      * @param iata IATA code
      */
     private void removeDataPoints(String iata) {
-        Set<DataPoint> dataPoints = dataPointsPerAirport.remove(iata);
-        for (DataPoint dataPoint : dataPoints) {
+        Map<DataPointType, DataPoint> dataPoints = dataPointsPerAirport.remove(iata);
+        if (dataPoints == null) {
+            return;
+        }
+        for (DataPoint dataPoint : dataPoints.values()) {
             DataPointKey dpKey = new DataPointKey(iata, dataPoint.getType());
             allDataPoints.remove(dpKey);
         }
     }
     
     @Override
-    public AirportData findAirportData(String iata) {
+    public AirportData findAirport(String iata) {
         return airports.get(iata);
     }
 

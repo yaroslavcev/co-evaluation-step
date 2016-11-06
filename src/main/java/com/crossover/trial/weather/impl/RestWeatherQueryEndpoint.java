@@ -11,9 +11,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.crossover.trial.weather.WeatherQueryStatistic;
 import com.crossover.trial.weather.api.AtmosphericInformation;
 import com.crossover.trial.weather.api.WeatherQueryEndpoint;
+import com.crossover.trial.weather.api.WeatherQueryStatistic;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;
 import com.google.gson.Gson;
@@ -33,11 +33,16 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     /** shared gson json to object factory */
     private static final Gson gson = new Gson();
     
-    @Inject
     private WeatherQueryStatisticService queryStatistic;
     
-    @Inject
     private AtmosphericInformationService atmosphericInformationService; 
+    
+    @Inject
+    public RestWeatherQueryEndpoint(WeatherQueryStatisticService queryStatistic,
+            AtmosphericInformationService atmosphericInformationService) {
+        this.queryStatistic = queryStatistic;
+        this.atmosphericInformationService = atmosphericInformationService;
+    }
     
     @Override
     public String ping() {
@@ -45,7 +50,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
     	
         Map<String, Object> retval = new HashMap<>();
         retval.put("datasize", stastic.getDatasize());
-        retval.put("iata_freq", stastic.getIataFrequency());
+        retval.put("iata_freq",stastic.getIataFrequency());
         retval.put("radius_freq", stastic.getRadiusFrequency());
 
         return gson.toJson(retval);
