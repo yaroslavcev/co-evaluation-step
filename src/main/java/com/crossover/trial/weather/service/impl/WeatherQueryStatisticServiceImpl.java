@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
-import com.crossover.trial.weather.WeatherQueryStatistic;
 import com.crossover.trial.weather.api.AirportData;
+import com.crossover.trial.weather.api.WeatherQueryStatistic;
 import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;

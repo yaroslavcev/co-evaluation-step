@@ -23,6 +23,7 @@ public interface WeatherQueryEndpoint {
      */
     @GET
     @Path("/ping")
+    @Produces(MediaType.APPLICATION_JSON)
     String ping();
 
     /**

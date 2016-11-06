@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.crossover.trial.weather.api.AirportData;
+import com.crossover.trial.weather.api.WeatherQueryStatistic;
 import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;

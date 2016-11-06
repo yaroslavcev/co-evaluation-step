@@ -1,13 +1,20 @@
 package com.crossover.trial.weather;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.crossover.trial.weather.api.AirportData;
+import com.crossover.trial.weather.api.AtmosphericInformation;
 import com.crossover.trial.weather.api.DataPoint;
+import com.crossover.trial.weather.api.DataPointType;
 
 /**
  * A reference implementation for the weather client. Consumers of the REST API
@@ -36,55 +43,66 @@ public class WeatherClient {
         collect = client.target(baseUri).path("collect");
     }
 
-    public void pingCollect() {
-        WebTarget path = collect.path("/ping");
-        Response response = path.request().get();
-        System.out.print("collect.ping: " + response.readEntity(String.class) + "\n");
-    }
-
-    public void query(String iata) {
-        WebTarget path = query.path("/weather/" + iata + "/0");
-        Response response = path.request().get();
-        System.out.println("query." + iata + ".0: " + response.readEntity(String.class));
-    }
-
-    public void pingQuery() {
+    public Map<String, Object> pingQuery() {
         WebTarget path = query.path("/ping");
-        Response response = path.request().get();
-        System.out.println("query.ping: " + response.readEntity(String.class));
+        return path.request().get(new GenericType<Map<String, Object>>() {});
     }
 
-    public void populate(String pointType, int first, int last, int mean, int median, int count) {
-        WebTarget path = collect.path("/weather/BOS/" + pointType);
-        DataPoint dp = new DataPoint.Builder().withFirst(first).withLast(last).withMean(mean).withMedian(median)
-                .withCount(count).build();
-        Response post = path.request().post(Entity.entity(dp, MediaType.APPLICATION_JSON));//, "application/json"
-        
-        System.out.println("Populate res: " + post);
+    public boolean pingCollect() {
+        WebTarget path = collect.path("/ping");
+        String response = path.request().get(String.class);
+        return "1".equals(response);
+    }
+    
+    public List<AtmosphericInformation> weather(String iata, String radius) {
+        return query.path("/weather/{iata}/{radius}")
+                .resolveTemplate("iata", iata)
+                .resolveTemplate("radius", radius)
+                .request()
+                .get(new GenericType<List<AtmosphericInformation>>() {});
+    }
+    
+    public Response updateWeather(String iata, DataPointType pointType, double mean, int first, int second, int third,
+            int count) {
+        WebTarget path = collect.path("/weather/{iata}/{pointType}")
+                .resolveTemplate("iata", iata)
+                .resolveTemplate("pointType", pointType);
+
+        DataPoint dp = new DataPoint.Builder()
+                .withMean(mean)
+                .withFirst(first)
+                .withSecond(second)
+                .withThird(third)
+                .withCount(count)
+                .build();
+
+        return path.request().post(Entity.entity(dp, MediaType.APPLICATION_JSON));
     }
     
     public Response addAirport(String iata, String latString, String longString) {
         return collect.path("/airport/{iata}/{lat}/{long}")
-            .resolveTemplate("iata", iata)
-            .resolveTemplate("lat", latString)
-            .resolveTemplate("long", longString)
-            .request()
-            .post(Entity.text(""));
+                .resolveTemplate("iata", iata)
+                .resolveTemplate("lat", latString)
+                .resolveTemplate("long", longString)
+                .request()
+                .post(Entity.text(""));
     }
     
-    public static void main(String[] args) {
-        WeatherClient wc = new WeatherClient();
-        wc.pingCollect();
-        wc.populate("wind", 0, 10, 6, 4, 20);
-
-        wc.query("BOS");
-        wc.query("JFK");
-        wc.query("EWR");
-        wc.query("LGA");
-        wc.query("MMU");
-
-        wc.pingQuery();
-
-        System.out.print("complete");
+    public Response deleteAirport(String iata) {
+        return collect.path("/airport/{iata}")
+                .resolveTemplate("iata", iata)
+                .request()
+                .delete();
+    }
+    
+    public List<String> getAirports() {
+        return collect.path("/airports").request().get(new GenericType<List<String>>() {});
+    }
+    
+    public AirportData getAirport(String iata) {
+        return collect.path("/airport/{iata}")
+                .resolveTemplate("iata", iata)
+                .request()
+                .get(AirportData.class);
     }
 }

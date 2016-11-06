@@ -33,11 +33,14 @@ public class AtmosphericInformationServiceImpl implements AtmosphericInformation
     public AtmosphericInformation getForAirport(String iata) {
         Collection<DataPoint> dataPoints = weatherDataPointDao.getAllForAirport(iata);
         AtmosphericInformation res = new AtmosphericInformation();
+        long lastUpdateTime = 0;
         for (DataPoint dataPoint : dataPoints) {
             dataPoint.getType().appendToAtmosphericInformation(res, dataPoint);
-            //TODO update time
+            if (dataPoint.getLastUpdateTime() > lastUpdateTime) {
+                lastUpdateTime = dataPoint.getLastUpdateTime();
+            }
         }
-        
+        res.setLastUpdateTime(lastUpdateTime);
         return res;
     }
 
@@ -45,7 +48,6 @@ public class AtmosphericInformationServiceImpl implements AtmosphericInformation
     public void updateWeather(String iataCode, DataPointType dataPointType, DataPoint dataPoint)
             throws AirportNotFoundException {
         if (dataPointType.check(dataPoint)) {
-            dataPoint.setType(dataPointType);
             weatherDataPointDao.updateWeather(iataCode, dataPoint);
         }
     }

@@ -4,8 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import jersey.repackaged.com.google.common.base.Objects;
-
 /**
  * Basic airport information.
  *
@@ -22,8 +20,7 @@ public class AirportData {
     /** longitude value in degrees */
     private final double longitude;
 
-
-    private AirportData(String iata, double latitude, double longitude) {
+    public AirportData(String iata, double latitude, double longitude) {
         this.iata = iata;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -47,23 +44,40 @@ public class AirportData {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-        
-        if (other instanceof AirportData) {
-            return Objects.equal(this.getIata(), ((AirportData)other).getIata());
-        }
-
-        return false;
-    }
-    
-    @Override
     public int hashCode() {
-    	return (iata == null) ? 0 : iata.hashCode();
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((iata == null) ? 0 : iata.hashCode());
+        long temp;
+        temp = Double.doubleToLongBits(latitude);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(longitude);
+        result = prime * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AirportData other = (AirportData) obj;
+        if (iata == null) {
+            if (other.iata != null)
+                return false;
+        } else if (!iata.equals(other.iata))
+            return false;
+        if (Double.doubleToLongBits(latitude) != Double.doubleToLongBits(other.latitude))
+            return false;
+        if (Double.doubleToLongBits(longitude) != Double.doubleToLongBits(other.longitude))
+            return false;
+        return true;
+    }
+
+
     public static class AirportDataBuilder {
         String iata;
 
@@ -93,6 +107,10 @@ public class AirportData {
         public AirportData build() {
             if (StringUtils.isBlank(iata)) {
                 throw new IllegalArgumentException("IATA code can not be empty for airport");
+            }
+            
+            if (iata.length() != 3) {
+                throw new IllegalArgumentException("IATA code must have three letters");
             }
             
             if (latitude > 90 || latitude < -90) {

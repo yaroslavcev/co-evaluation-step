@@ -1,5 +1,16 @@
 package com.crossover.trial.weather.impl;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import com.crossover.trial.weather.api.AirportData;
 import com.crossover.trial.weather.api.AirportNotFoundException;
 import com.crossover.trial.weather.api.DataPoint;
@@ -9,16 +20,6 @@ import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * A REST implementation of the WeatherCollector API. Accessible only to airport weather collection
@@ -34,15 +35,20 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
     /** shared gson json to object factory */
     public final static Gson gson = new Gson();
     
-    @Inject
     private AirportService airportService;
     
-    @Inject
     private AtmosphericInformationService atmosphericInformationService;
+    
+    @Inject
+    public RestWeatherCollectorEndpoint(AirportService airportService,
+            AtmosphericInformationService atmosphericInformationService) {
+        this.airportService = airportService;
+        this.atmosphericInformationService = atmosphericInformationService;
+    }
     
     @Override
     public Response ping() {
-        return Response.ok("ready").build();
+        return Response.ok("1").build();
     }
 
     @Override
@@ -52,6 +58,8 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         try {
             DataPointType dataPointType = DataPointType.valueOf(pointType);
             DataPoint dataPoint = gson.fromJson(datapointJson, DataPoint.class);
+            
+            dataPoint = completeDataPoint(dataPoint, dataPointType);
             
             atmosphericInformationService.updateWeather(iataCode, dataPointType, dataPoint);
             
@@ -64,14 +72,15 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
         return Response.ok().build();
     }
 
-
     @Override
     public Response getAirports() {
-        Set<String> retval = new HashSet<>();
-        for (AirportData ad : airportService.getAllAirports()) {
-            retval.add(ad.getIata());
-        }
-        return Response.ok(retval).build();
+        Collection<AirportData> foundAirports = airportService.getAllAirports();
+        
+        List<String> codes = foundAirports.stream()
+                .map(a -> a.getIata())
+                .collect(Collectors.toList());
+        
+        return Response.ok(codes).build();
     }
 
     @Override
@@ -106,6 +115,27 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
     public Response deleteAirport(String iata) {
         airportService.remove(iata);
         return Response.ok().build();
+    }
+    
+    /**
+     * If data point does not contain type and update time then complete them.
+     */
+    private DataPoint completeDataPoint(DataPoint dataPoint, DataPointType dataPointType) {
+        if (dataPoint.getLastUpdateTime() > 0 && dataPoint.getType() != null) {
+            return dataPoint;
+        }
+        
+        DataPoint dp = new DataPoint.Builder()
+                .withType(dataPointType)
+                .withLastUpdate(System.currentTimeMillis())
+                .withMean(dataPoint.getMean())
+                .withFirst(dataPoint.getFirst())
+                .withSecond(dataPoint.getSecond())
+                .withThird(dataPoint.getThird())
+                .withCount(dataPoint.getCount())
+                .build();
+        
+        return dp;
     }
     
     private AirportData findAirportData(String iata) {

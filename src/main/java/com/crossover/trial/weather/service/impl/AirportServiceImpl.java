@@ -16,8 +16,12 @@ public class AirportServiceImpl implements AirportService {
     /** earth radius in KM */
     public static final double R = 6372.8;
     
-	@Inject
 	AirportDao airportDao;
+	
+	@Inject
+	public AirportServiceImpl(AirportDao airportDao) {
+	    this.airportDao = airportDao;
+	}
 	
 	@Override
 	public Collection<AirportData> getAllAirports() {
@@ -68,6 +72,6 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public AirportData findAirportData(String iata) {
-        return airportDao.findAirportData(iata);
+        return airportDao.findAirport(iata);
     }
 }

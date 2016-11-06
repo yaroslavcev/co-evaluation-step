@@ -26,20 +26,6 @@ public class AtmosphericInformation {
     /** the last time this data was updated, in milliseconds since UTC epoch */
     private long lastUpdateTime;
 
-    public AtmosphericInformation() {
-
-    }
-
-    protected AtmosphericInformation(DataPoint temperature, DataPoint wind, DataPoint humidity, DataPoint percipitation, DataPoint pressure, DataPoint cloudCover) {
-        this.temperature = temperature;
-        this.wind = wind;
-        this.humidity = humidity;
-        this.precipitation = percipitation;
-        this.pressure = pressure;
-        this.cloudCover = cloudCover;
-        this.lastUpdateTime = System.currentTimeMillis();
-    }
-
     public DataPoint getTemperature() {
         return temperature;
     }

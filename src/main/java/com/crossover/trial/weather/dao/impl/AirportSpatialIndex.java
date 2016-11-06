@@ -25,13 +25,13 @@ public class AirportSpatialIndex {
     }
     
     private Point toPoint(AirportData airport) {
-        return Geometries.point(airport.getLongitude(), airport.getLatitude());
+        return Geometries.pointGeographic(airport.getLongitude(), airport.getLatitude());
     }
     
     public List<AirportData> findAllAirportInsideRectangle(double lowerLeftLatitudeInDegrees,
             double lowerLeftLongitudeInDegrees, double upperRightLatitudeInDegrees,
             double upperRightLongitudeInDegrees) {
-        Rectangle r = Geometries.rectangle(lowerLeftLongitudeInDegrees, lowerLeftLatitudeInDegrees,
+        Rectangle r = Geometries.rectangleGeographic(lowerLeftLongitudeInDegrees, lowerLeftLatitudeInDegrees,
                 upperRightLongitudeInDegrees, upperRightLatitudeInDegrees);  
         return rTree.search(r).map(e -> e.value()).toList().toBlocking().single(); 
     }
