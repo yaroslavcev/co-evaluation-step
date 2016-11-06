@@ -5,7 +5,7 @@
 #
 
 function cleanup() {
-    kill ${SERVER_PID} ${CLIENT_PID}
+    kill ${SERVER_PID}
     rm -f cp.txt
 }
 
@@ -13,8 +13,8 @@ trap cleanup EXIT
 
 mvn test dependency:build-classpath -Dmdep.outputFile=cp.txt
 CLASSPATH=$(cat cp.txt):target/classes
-java -classpath ${CLASSPATH} com.crossover.trial.weather.WeatherServer &
-SERVER_PID=$$
+eval "(java -classpath ${CLASSPATH} com.crossover.trial.weather.WeatherServer) &"
+SERVER_PID=$!
 
 while ! nc localhost 9090 > /dev/null 2>&1 < /dev/null; do
     echo "$(date) - waiting for server at localhost:9090..."
@@ -22,5 +22,5 @@ while ! nc localhost 9090 > /dev/null 2>&1 < /dev/null; do
 done
 
 java -classpath ${CLASSPATH} com.crossover.trial.weather.WeatherClient
-CLIENT_PID=$$
+
 cleanup

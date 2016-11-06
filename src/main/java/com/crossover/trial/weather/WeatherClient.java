@@ -159,4 +159,9 @@ public class WeatherClient {
                 .request()
                 .get(AirportData.class);
     }
+    
+    public static void main(String[] args) {
+        WeatherClient wc = new WeatherClient();
+        wc.addAirport("AAA", "10", "10");
+    }
 }

@@ -83,10 +83,12 @@ public class WeatherServer {
     }
 
     public void stop() {
+        System.out.println("Stopping Weather App local testing server: " + baseUrl);
         if (server != null) {
             server.shutdownNow();
             server = null;
         }
+        System.out.println("Weather server has been stopped");
     }
 
     public static void main(String[] args) {
