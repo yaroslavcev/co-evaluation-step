@@ -15,6 +15,11 @@ import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;
 
+/**
+ * In memory implementation of WeatherQueryStatisticService.
+ * @author Ilya
+ *
+ */
 public class WeatherQueryStatisticServiceImpl implements WeatherQueryStatisticService {
     public static final int RADIUS_HISTOGRAM_STEP = 10;
     

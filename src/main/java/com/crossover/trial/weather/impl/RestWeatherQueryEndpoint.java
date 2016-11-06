@@ -30,8 +30,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
 
     public final static Logger LOGGER = Logger.getLogger("WeatherQuery");
 
-    /** shared gson json to object factory */
-    private static final Gson gson = new Gson();
+    private Gson gson = new Gson();
     
     private WeatherQueryStatisticService queryStatistic;
     

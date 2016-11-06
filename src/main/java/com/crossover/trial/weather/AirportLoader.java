@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * A simple airport loader which reads a file from disk and sends entries to the
- * webservice
+ * webservice.
  * 
  * @author code test administrator
  */
@@ -40,6 +40,10 @@ public class AirportLoader {
         weatherClient = new WeatherClient(baseUrl);
     }
 
+    /**
+     * Read data from the input stream line by line and send them to the server.
+     * @param airportDataStream data stream to read
+     */
     public void upload(InputStream airportDataStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(airportDataStream));
         String line = null;

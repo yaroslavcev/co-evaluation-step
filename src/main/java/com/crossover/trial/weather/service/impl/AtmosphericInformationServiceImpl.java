@@ -16,6 +16,11 @@ import com.crossover.trial.weather.dao.WeatherDataPointDao;
 import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 
+/**
+ * Implementation of AtmosphericInformationService.
+ * @author Ilya
+ *
+ */
 public class AtmosphericInformationServiceImpl implements AtmosphericInformationService {
     
     @Inject

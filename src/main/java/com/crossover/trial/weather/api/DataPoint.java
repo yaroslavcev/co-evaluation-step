@@ -1,7 +1,7 @@
 package com.crossover.trial.weather.api;
 
 /**
- * A collected point, including some information about the range of collected values
+ * A collected point, including some information about the range of collected values.
  *
  * @author code test administrator
  */

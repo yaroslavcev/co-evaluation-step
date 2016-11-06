@@ -22,7 +22,7 @@ public enum DataPointType {
         public boolean check(DataPoint dp) {
             return dp.getMean() >= -50 && dp.getMean() < 100;
         }
-        
+
         @Override
         public void appendToAtmosphericInformation(AtmosphericInformation ai, DataPoint temperature) {
             ai.setTemperature(temperature);
@@ -33,7 +33,7 @@ public enum DataPointType {
         public boolean check(DataPoint dp) {
             return dp.getMean() >= 0 && dp.getMean() < 100;
         }
-        
+
         @Override
         public void appendToAtmosphericInformation(AtmosphericInformation ai, DataPoint humidity) {
             ai.setHumidity(humidity);
@@ -44,7 +44,7 @@ public enum DataPointType {
         public boolean check(DataPoint dp) {
             return dp.getMean() >= 650 && dp.getMean() < 800;
         }
-        
+
         @Override
         public void appendToAtmosphericInformation(AtmosphericInformation ai, DataPoint pressure) {
             ai.setPressure(pressure);
@@ -55,7 +55,7 @@ public enum DataPointType {
         public boolean check(DataPoint dp) {
             return dp.getMean() >= 0 && dp.getMean() < 100;
         }
-        
+
         @Override
         public void appendToAtmosphericInformation(AtmosphericInformation ai, DataPoint cloudCover) {
             ai.setCloudCover(cloudCover);
@@ -64,17 +64,18 @@ public enum DataPointType {
     PRECIPITATION {
         @Override
         public boolean check(DataPoint dp) {
-            return dp.getMean() >=0 && dp.getMean() < 100;
+            return dp.getMean() >= 0 && dp.getMean() < 100;
         }
-        
+
         @Override
         public void appendToAtmosphericInformation(AtmosphericInformation ai, DataPoint precipitation) {
             ai.setPrecipitation(precipitation);
         }
     };
-    
+
     /**
      * Check if data point have legitimate value.
+     * @param dp data point to check
      * @return true if data is acceptable false otherwise
      */
     public abstract boolean check(DataPoint dp);
