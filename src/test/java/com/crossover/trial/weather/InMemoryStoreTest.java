@@ -14,6 +14,11 @@ import com.crossover.trial.weather.api.DataPoint;
 import com.crossover.trial.weather.api.DataPointType;
 import com.crossover.trial.weather.dao.impl.InMemoryStoreImpl;
 
+/**
+ * Test key features of InMemoryStoreImpl.
+ * @author Ilya
+ *
+ */
 public class InMemoryStoreTest {
     private static final long _24H = 86400000; 
     private static final long _48H = 2 * _24H;

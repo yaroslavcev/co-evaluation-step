@@ -9,6 +9,11 @@ import org.junit.Test;
 import com.crossover.trial.weather.api.AirportData;
 import com.crossover.trial.weather.dao.impl.AirportSpatialIndex;
 
+/**
+ * Test AirportSpatialIndex features.
+ * @author Ilya
+ *
+ */
 public class SpatialIndexTest {
     AirportSpatialIndex spatiallIndex;
     

@@ -25,9 +25,14 @@ import com.crossover.trial.weather.impl.RestWeatherQueryEndpoint;
 import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;
 
+/**
+ * Test for WeatherQueryEndpoint implementation.
+ * @author Ilya
+ *
+ */
 public class WeatherQueryEndpointTest {
 
-    private WeatherQueryEndpoint _query;
+    private WeatherQueryEndpoint queryEndpoint;
 
     private AtmosphericInformationService atmosphericInformationServiceMock;
     private WeatherQueryStatisticService queryStatisticMock;
@@ -37,7 +42,7 @@ public class WeatherQueryEndpointTest {
         atmosphericInformationServiceMock = mock(AtmosphericInformationService.class);
         queryStatisticMock = mock(WeatherQueryStatisticService.class);
 
-        _query = new RestWeatherQueryEndpoint(queryStatisticMock, atmosphericInformationServiceMock);
+        queryEndpoint = new RestWeatherQueryEndpoint(queryStatisticMock, atmosphericInformationServiceMock);
     }
 
     @Test
@@ -54,20 +59,20 @@ public class WeatherQueryEndpointTest {
 
         when(queryStatisticMock.getStatisitc()).thenReturn(stat);
 
-        String ping = _query.ping();
+        String ping = queryEndpoint.ping();
 
         assertEquals("{\"iata_freq\":{\"AAA\":0.5,\"BBB\":0.5},\"radius_freq\":[0,0,10],\"datasize\":10}", ping);
     }
 
     @Test
     public void testQueryWeatherBadRequest() throws Exception {
-        Response resp = _query.weather("BOS", "a");
+        Response resp = queryEndpoint.weather("BOS", "a");
         Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), resp.getStatus());
     }
 
     @Test
     public void testQueryWeatherNotFound() throws Exception {
-        Response resp = _query.weather("BOS", "10");
+        Response resp = queryEndpoint.weather("BOS", "10");
         Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), resp.getStatus());
     }
 
@@ -81,7 +86,7 @@ public class WeatherQueryEndpointTest {
         atmInfoList.add(atmInfo);
 
         when(atmosphericInformationServiceMock.getForRadius(anyString(), anyDouble())).thenReturn(atmInfoList);
-        Response resp = _query.weather("BOS", "10");
+        Response resp = queryEndpoint.weather("BOS", "10");
         Assert.assertEquals(Response.Status.OK.getStatusCode(), resp.getStatus());
 
         Assert.assertEquals(atmInfoList, resp.getEntity());

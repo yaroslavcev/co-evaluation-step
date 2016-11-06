@@ -12,8 +12,16 @@ import com.crossover.trial.weather.dao.AirportDao;
 import com.crossover.trial.weather.service.AirportService;
 import com.crossover.trial.weather.util.GeoLocation;
 
+/**
+ * AirportService implementation that uses GeoLocation to calculate MBR for
+ * radius. This implementation suppose on AirportDao effectively implement
+ * findAllAirportInsideRectangle method.
+ * 
+ * @author Ilya
+ *
+ */
 public class AirportServiceImpl implements AirportService {
-    /** earth radius in KM */
+    /** earth radius in KM. */
     public static final double R = 6372.8;
     
 	AirportDao airportDao;

@@ -38,7 +38,7 @@ public interface WeatherCollectorEndpoint {
                            String datapointJson);
 
     /**
-     * Return a list of known airports as a json formatted list
+     * Return a list of known airports as a json formatted list.
      *
      * @return HTTP Response code and a json formatted list of IATA codes
      */
@@ -48,7 +48,7 @@ public interface WeatherCollectorEndpoint {
     Response getAirports();
 
     /**
-     * Retrieve airport data, including latitude and longitude for a particular airport
+     * Retrieve airport data, including latitude and longitude for a particular airport.
      *
      * @param iata the 3 letter airport code
      * @return an HTTP Response with a json representation of {@link AirportData}
@@ -73,7 +73,7 @@ public interface WeatherCollectorEndpoint {
                         @PathParam("long") String longString);
 
     /**
-     * Remove an airport from the known airport list
+     * Remove an airport from the known airport list.
      *
      * @param iata the 3 letter airport code
      * @return HTTP Repsonse code for the delete operation

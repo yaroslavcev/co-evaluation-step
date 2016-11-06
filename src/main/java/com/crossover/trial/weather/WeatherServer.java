@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 
 import static java.lang.String.*;
 
-
 /**
  * This main method will be use by the automated functional grader. You
  * shouldn't move this class or remove the main method. You may change the
@@ -28,20 +27,21 @@ import static java.lang.String.*;
  * @author code test administrator
  */
 public class WeatherServer {
-
-    private static final String BASE_URL = "http://localhost:9090/";
+    private static final Logger LOG = Logger.getLogger(WeatherServer.class.getName());
     
+    private static final String BASE_URL = "http://localhost:9090/";
+
     private String baseUrl;
     private HttpServer server;
-    
+
     public WeatherServer(String baseUrl) {
-    	this.baseUrl = baseUrl;
+        this.baseUrl = baseUrl;
     }
-    
+
     public WeatherServer() {
-    	this(BASE_URL);
+        this(BASE_URL);
     }
-    
+
     public void start() throws IOException {
         System.out.println("Starting Weather App local testing server: " + baseUrl);
 
@@ -60,38 +60,47 @@ public class WeatherServer {
         };
         server.getServerConfiguration().getMonitoringConfig().getWebServerConfig().addProbes(probe);
 
-        // the autograder waits for this output before running automated tests, please don't remove it
+        // the autograder waits for this output before running automated tests,
+        // please don't remove it
         server.start();
         System.out.println(format("Weather Server started.\n url=%s\n", baseUrl));
     }
-    
+
+    /**
+     * Register DAO binders for injecting,
+     * @param resourceConfig config to regidter
+     */
     protected void registerDaoBinder(ResourceConfig resourceConfig) {
-    	resourceConfig.register(new DaoBinder());
+        resourceConfig.register(new DaoBinder());
     }
-    
+
+    /**
+     * Register service binders for injecting,
+     * @param resourceConfig config to regidter
+     */
     protected void registerServiceBinder(ResourceConfig resourceConfig) {
-    	resourceConfig.register(new ServiceBinder());
+        resourceConfig.register(new ServiceBinder());
     }
-    
+
     public void stop() {
-    	if (server != null) {
-    		server.shutdownNow();
-    		server = null;
-    	}
+        if (server != null) {
+            server.shutdownNow();
+            server = null;
+        }
     }
-    
+
     public static void main(String[] args) {
         try {
-        	WeatherServer weatherServer = new WeatherServer();
-        	
-        	weatherServer.start();
-        	
+            WeatherServer weatherServer = new WeatherServer();
+
+            weatherServer.start();
+
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            	weatherServer.stop();
+                weatherServer.stop();
             }));
-            
+
         } catch (IOException ex) {
-            Logger.getLogger(WeatherServer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }
 }

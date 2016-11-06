@@ -32,8 +32,7 @@ import com.google.gson.JsonSyntaxException;
 public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
     public final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
 
-    /** shared gson json to object factory */
-    public final static Gson gson = new Gson();
+    private Gson gson = new Gson();
     
     private AirportService airportService;
     

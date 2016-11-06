@@ -15,10 +15,17 @@ import com.crossover.trial.weather.service.AtmosphericInformationService;
 import com.crossover.trial.weather.service.WeatherQueryStatisticService;
 import com.crossover.trial.weather.service.impl.WeatherQueryStatisticServiceImpl;
 
+/**
+ * Test for WeatherQueryStatisticService implementation.
+ * @author Ilya
+ *
+ */
 public class WeatherQueryStatisticTest {
     private static final long ATMPOSPHERIC_DATA_COUNT = 100;
     private static final int AIRPORTS_COUNT = 100;
     
+    private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
     private static final int RADIUS = 42;
     
     private List<AirportData> airports = generateAirports(AIRPORTS_COUNT);
@@ -80,15 +87,14 @@ public class WeatherQueryStatisticTest {
         return new WeatherQueryStatisticServiceImpl(airportService, atmosphericInformationService);
     }
     
-    private List<AirportData> generateAirports(int count) {
+    private List<AirportData> generateAirports(int airportCount) {
         List<AirportData> res = new LinkedList<>();
-        while(count --> 0) {
-            res.add(createAirport(generateIata(count)));
+        int counter = airportCount;
+        while(counter --> 0) {
+            res.add(createAirport(generateIata(counter)));
         }
         return res;
     }
-    
-    private static final String ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
     /**
      * Generate three letter iata code by number.
