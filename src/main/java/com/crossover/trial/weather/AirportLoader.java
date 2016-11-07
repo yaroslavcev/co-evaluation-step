@@ -40,6 +40,18 @@ public class AirportLoader {
         weatherClient = new WeatherClient(baseUrl);
     }
 
+    public AirportLoader(int iataPos, int latitudePos, int longitudePos) {
+        this();
+        this.iataPos = iataPos;
+        this.latitudePos = latitudePos;
+        this.longitudePos = longitudePos;
+    }
+
+
+    public AirportLoader(String splitBy, int iataPos, int latitudePos, int longitudePos) {
+        this(iataPos, latitudePos, longitudePos);
+    }
+
     /**
      * Read data from the input stream line by line and send them to the server.
      * @param airportDataStream data stream to read
@@ -107,21 +119,22 @@ public class AirportLoader {
     }
 
     public static void main(String args[]) throws IOException {
-        int k = 0;
-        System.out.println(++k == 1);
+        //TODO read delimiter, and column numbers from parameters
         if (args.length != 1) {
             System.out.println("usage: " + AirportLoader.class.getName() + " input_file");
             return;
         }
+        
         String filePath = args[0];
         File airportDataFile = new File(filePath);
         if (!airportDataFile.exists()) {
             System.err.println("File " + filePath + " does not exist");
             return;
         }
+        
         long start = System.currentTimeMillis();
         AirportLoader al = new AirportLoader();
-        try (FileInputStream fis = new FileInputStream(airportDataFile + "_")) {
+        try (FileInputStream fis = new FileInputStream(airportDataFile)) {
             al.upload(fis);
         }
         long end = System.currentTimeMillis();

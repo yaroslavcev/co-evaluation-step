@@ -42,7 +42,7 @@ public class WeatherIntegrationTest {
         weatherServer = new WeatherServer(BASE_URI);
         weatherServer.start();
 
-        weatherClient = new WeatherClient(BASE_URI);// "http://ipv4.fiddler:9090");//
+        weatherClient = new WeatherClient(BASE_URI);
 
         loadAirports();
     }
