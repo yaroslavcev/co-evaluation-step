@@ -9,6 +9,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.crossover.trial.weather.api.AirportData;
 import com.crossover.trial.weather.api.AirportNotFoundException;
 import com.crossover.trial.weather.api.DataPoint;
@@ -24,6 +27,8 @@ import jersey.repackaged.com.google.common.base.Objects;
  *
  */
 public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryStoreImpl.class);
+    
     /**
      * All data points. It uses compound key (iataCode, dataPointType)
      */
@@ -53,12 +58,15 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
     
     @Override
     public void updateWeather(String iataCode, DataPoint dataPoint) throws AirportNotFoundException {
+        LOG.debug("Trying to udate {} for airport [{}]", dataPoint, iataCode);
+        
         ifAirportExistExecuteUnderLock(iataCode, () -> {
             DataPointType dataPointType = dataPoint.getType();
             getDataPointsForAirport(iataCode).put(dataPointType, dataPoint);
             
             DataPointKey dpKey = new DataPointKey(iataCode, dataPointType);
             allDataPoints.put(dpKey, dataPoint);
+            LOG.debug("Updated data point {} for airport [{}]", dataPoint, iataCode);
         });
     }
     
@@ -116,6 +124,8 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
 
     @Override
     public void add(AirportData airport) {
+        LOG.debug("Adding airport {}", airport);
+        
         allAirportsLock.writeLock().lock();
         
         try {
@@ -139,18 +149,23 @@ public class InMemoryStoreImpl implements AirportDao, WeatherDataPointDao {
 
     @Override
     public void remove(String iata) {
+        LOG.debug("Removing airport {}", iata);
+        
         allAirportsLock.writeLock().lock();
-        ReadWriteLock rwLock = getOrCreateLock(iata);
-        rwLock.writeLock().lock();
         try {
-            AirportData airport = airports.remove(iata);
-            removeFromSpatialIndex(airport);
-            removeDataPoints(iata);
-            
-            airportLocks.remove(iata);
+            ReadWriteLock airportLock = getOrCreateLock(iata);
+            airportLock.writeLock().lock();
+            try {
+                AirportData airport = airports.remove(iata);
+                removeFromSpatialIndex(airport);
+                removeDataPoints(iata);
+                
+                airportLocks.remove(iata);
+            } finally {
+                airportLock.writeLock().unlock();
+            }
         } finally {
             allAirportsLock.writeLock().unlock();
-            rwLock.writeLock().unlock();
         }
     }
     

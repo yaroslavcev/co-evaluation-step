@@ -11,6 +11,11 @@ import com.crossover.trial.weather.service.impl.AirportServiceImpl;
 import com.crossover.trial.weather.service.impl.AtmosphericInformationServiceImpl;
 import com.crossover.trial.weather.service.impl.WeatherQueryStatisticServiceImpl;
 
+/**
+ * Binds services to implementations.
+ * @author Ilya
+ *
+ */
 public class ServiceBinder extends AbstractBinder {
 
     @Override

@@ -2,10 +2,10 @@ package com.crossover.trial.weather;
 
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.http.server.*;
-import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
-import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.crossover.trial.weather.di.DaoBinder;
 import com.crossover.trial.weather.di.ServiceBinder;
@@ -14,8 +14,6 @@ import com.crossover.trial.weather.impl.RestWeatherQueryEndpoint;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.lang.String.*;
 
@@ -27,7 +25,7 @@ import static java.lang.String.*;
  * @author code test administrator
  */
 public class WeatherServer {
-    private static final Logger LOG = Logger.getLogger(WeatherServer.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(WeatherServer.class);
     
     private static final String BASE_URL = "http://localhost:9090/";
 
@@ -43,7 +41,7 @@ public class WeatherServer {
     }
 
     public void start() throws IOException {
-        System.out.println("Starting Weather App local testing server: " + baseUrl);
+        LOG.info("Starting Weather App local testing server: {}", baseUrl);
 
         final ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.register(RestWeatherCollectorEndpoint.class);
@@ -54,12 +52,20 @@ public class WeatherServer {
         server = GrizzlyHttpServerFactory.createHttpServer(URI.create(baseUrl), resourceConfig, false);
 
         HttpServerProbe probe = new HttpServerProbe.Adapter() {
+            @SuppressWarnings("rawtypes")
             public void onRequestReceiveEvent(HttpServerFilter filter, Connection connection, Request request) {
-                System.out.println(request.getRequestURI());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Request received. Method [{}], URI [{}]", request.getMethod(), request.getRequestURI());
+                }
             }
         };
-        server.getServerConfiguration().getMonitoringConfig().getWebServerConfig().addProbes(probe);
-
+        ServerConfiguration serverConfiguration = server.getServerConfiguration();
+        
+        //TODO add API for configuration of thread pools
+        serverConfiguration.getMonitoringConfig().getWebServerConfig().addProbes(probe);
+        serverConfiguration.setMaxPostSize(5 * 1024); //5K to prevent DoS attacks with big requests 
+        serverConfiguration.setName("WeatherServer");
+        
         // the autograder waits for this output before running automated tests,
         // please don't remove it
         server.start();
@@ -83,12 +89,12 @@ public class WeatherServer {
     }
 
     public void stop() {
-        System.out.println("Stopping Weather App local testing server: " + baseUrl);
+        LOG.info("Stopping Weather App local testing server: {}", baseUrl);
         if (server != null) {
             server.shutdownNow();
             server = null;
         }
-        System.out.println("Weather server has been stopped");
+        LOG.info("Weather server has been stopped");
     }
 
     public static void main(String[] args) {
@@ -102,7 +108,7 @@ public class WeatherServer {
             }));
 
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.error("Exception on WeatherServer start", ex);
         }
     }
 }

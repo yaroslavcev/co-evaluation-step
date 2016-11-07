@@ -3,13 +3,15 @@ package com.crossover.trial.weather.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.crossover.trial.weather.api.AtmosphericInformation;
 import com.crossover.trial.weather.api.WeatherQueryEndpoint;
@@ -27,8 +29,7 @@ import com.google.gson.Gson;
 
 @Path("/query")
 public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
-
-    public final static Logger LOGGER = Logger.getLogger("WeatherQuery");
+    private static final Logger LOG = LoggerFactory.getLogger(RestWeatherQueryEndpoint.class);
 
     private Gson gson = new Gson();
     
@@ -61,6 +62,7 @@ public class RestWeatherQueryEndpoint implements WeatherQueryEndpoint {
         try {
             radius = Double.valueOf(radiusString);
         } catch (NumberFormatException ex) {
+            LOG.debug("Number format excpetion on handling request for weather data", ex);
             return makePlainTextResponse(Response.Status.BAD_REQUEST, ex.getMessage());
         }
         

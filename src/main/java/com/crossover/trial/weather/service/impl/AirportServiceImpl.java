@@ -1,11 +1,15 @@
 package com.crossover.trial.weather.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.crossover.trial.weather.api.AirportData;
 import com.crossover.trial.weather.dao.AirportDao;
@@ -24,6 +28,8 @@ public class AirportServiceImpl implements AirportService {
     /** earth radius in KM. */
     public static final double R = 6372.8;
     
+    private static final Logger LOG = LoggerFactory.getLogger(AirportServiceImpl.class);
+            
 	AirportDao airportDao;
 	
 	@Inject
@@ -48,8 +54,11 @@ public class AirportServiceImpl implements AirportService {
 
     @Override
     public List<AirportData> findAllAirportsInRadius(String iata, double radius) {
+        LOG.debug("Finding adjacent airports for [{}] in radius {} km", iata, radius);
+        
         AirportData centralAirport = findAirportData(iata);
         if (centralAirport == null) {
+            LOG.debug("Can't find central airport [{}]", iata);
             return Collections.emptyList();
         }
         
@@ -60,11 +69,18 @@ public class AirportServiceImpl implements AirportService {
         GeoLocation[] bounds = centralAirportGeo.boundingCoordinates(radius, R);
         GeoLocation lowerLeftBound = bounds[0]; 
         GeoLocation upperRightBound = bounds[1];
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Found bounds {} for airport [{}] with location {} and radius {}", Arrays.toString(bounds), iata,
+                    centralAirportGeo, radius);
+        }
         
         //Step 2. Find all airport inside the MBR
         List<AirportData> airportFromRectangle = airportDao.findAllAirportInsideRectangle(
                 lowerLeftBound.getLatitudeInDegrees(), lowerLeftBound.getLongitudeInDegrees(),
                 upperRightBound.getLatitudeInDegrees(), upperRightBound.getLongitudeInDegrees());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Airports {} in the rectangle {} ", airportFromRectangle, Arrays.toString(bounds));
+        }
         
         //Step 3. Exclude airports that doesn't belong to specified circle 
         List<AirportData> result = new ArrayList<>(airportFromRectangle.size());
@@ -74,6 +90,8 @@ public class AirportServiceImpl implements AirportService {
                 result.add(currAirport);
             }
         }
+        
+        LOG.debug("Airports {} in radius {} for [{}]", result, radius, iata);
         
         return result;
     }

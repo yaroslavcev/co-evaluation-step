@@ -2,7 +2,6 @@ package com.crossover.trial.weather.impl;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -10,6 +9,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.crossover.trial.weather.api.AirportData;
 import com.crossover.trial.weather.api.AirportNotFoundException;
@@ -30,7 +32,7 @@ import com.google.gson.JsonSyntaxException;
 
 @Path("/collect")
 public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
-    public final static Logger LOGGER = Logger.getLogger(RestWeatherCollectorEndpoint.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(RestWeatherCollectorEndpoint.class);
 
     private Gson gson = new Gson();
     
@@ -63,8 +65,10 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
             atmosphericInformationService.updateWeather(iataCode, dataPointType, dataPoint);
             
         } catch (IllegalArgumentException | JsonSyntaxException ex) {
+            LOG.debug("Exception while serving weather update request", ex);
             return makePlainTextResponse(Response.Status.BAD_REQUEST, ex.getMessage());
         } catch (AirportNotFoundException e) {
+            LOG.debug("AirportNotFoundException exception while serving weather update request", e);
             return makePlainTextResponse(Response.Status.NOT_FOUND, makeAirportNotFoundMessage(iataCode));
         }
 
@@ -104,6 +108,7 @@ public class RestWeatherCollectorEndpoint implements WeatherCollectorEndpoint {
                     .build();
             airportService.add(airport);
         } catch (IllegalArgumentException ex) {
+            LOG.debug("Exception while serving add airport request", ex);
             return makePlainTextResponse(Response.Status.BAD_REQUEST, ex.getMessage());
         }
         
